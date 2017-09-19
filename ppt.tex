@@ -1,0 +1,126 @@
+\documentclass[UTF8]{beamer}
+\usepackage{mathtools}
+\usepackage{amsmath}
+\usepackage{CJKutf8}
+
+
+\newcommand\myeq{\stackrel{\mathclap{\tiny\mbox{def}}}{=}}
+\DeclareMathOperator*{\argmin}{arg\,min}
+% \usepackage{beamerthemesplit} // Activate for custom appearance
+
+\title{Understanding Black-box Predictions via Influence Functions}
+\author{Pang Wei Koh \& Percy Liang}
+
+\date{\today}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\section[Outline]{}
+\frame{\tableofcontents}
+
+\section{Introduction}
+\subsection{Overview of the Beamer Class}
+\frame
+{
+  \frametitle{Features of the Beamer Class}
+
+  \begin{itemize}
+  \item<1-> Normal LaTeX class.
+  \item<2-> Easy overlays.m
+  \item<3-> No external programs needed.      
+  \end{itemize}
+}
+
+\frame{
+\frametitle{Approach}
+\begin{itemize}
+\item Classification problem: $\mathcal{X} \mapsto \mathcal{Y}$, where $\mathcal{X}\in\mathbb{R}^M$ and $\mathcal{Y}\in\{+1, -1\}$.\\
+\item Training instances $z_1,\dots, z_n$, where $z_i = (x_i, y_i) \in \mathcal{X}\times\mathcal{Y}$\\
+\item Empirical loss is $L(z, \theta) = \frac{1}{n}\sum_{i=1}^{n}L(z_i, \theta)$, 
+\item $\hat{\theta} \myeq \argmin_{\theta\in\Theta}\frac{1}{n}\sum_{i=1}^nL(z_i, \theta)$
+\end{itemize}
+Assume $L(z, \theta)$ is twice-differentiable and strictly convex in $\theta$
+}
+\frame{
+\frametitle{Approach}
+If we remove $z$ from the training data, the change on parameter is $\Delta = \hat{\theta}_{-z} - \hat{\theta}$, where:
+\begin{align}
+\hat{\theta} &\myeq \argmin_{\theta\in\Theta}\frac{1}{n}\sum_{i=1}^nL(z_i, \theta) \nonumber\\
+\hat{\theta}_{-z} &\myeq \argmin_{\theta\in\Theta}\frac{1}{n}\sum_{z_i\neq z}L(z_i, \theta) \nonumber
+\end{align}
+The idea: compute $\Delta$ if $z$ were up-weighted by some small $\epsilon$:
+\begin{equation} \nonumber
+\hat{\theta}_{\epsilon, z} \myeq \argmin_{\theta\in\Theta}\frac{1}{n}\sum_{i=1}^nL(z_i, \theta) + \epsilon L(z, \theta)
+\end{equation}
+}
+\frame{
+\frametitle{Approach: influence on the parameters $\theta$}
+The influence of up-weighting $z$ on the parameters $\hat\theta$ is
+\begin{equation}
+\mathcal{I}_{up,params}(z)\myeq\frac{d\hat{\theta}_{\epsilon, z}}{d\epsilon}\vert_{\epsilon=0} = -H^{-1}_{\hat{\theta}}\nabla_\theta{}L(z, \hat{\theta}) \nonumber
+\end{equation}
+where, 
+\begin{equation}
+H_{\hat\theta} \myeq \frac{1}{n}\sum_{i=1}^n\nabla^2_{\theta}L(z_i, \hat\theta) \nonumber
+\end{equation}
+\textbf{What if $z$ is removed ?}
+Let $\epsilon = -\frac{1}{n}$, then (linear approximation)
+\begin{equation}
+\Delta = \hat{\theta}_{-z} - \hat{\theta} \approx -\frac{1}{n}\mathcal{I}_{up,params}(z)
+\end{equation}
+}
+
+\frame{
+\frametitle{Approach: influence on the test loss $L(z_{test}, \theta)$}
+What is the influence on the loss at a test point $z_{test}$ by upweighting $z$ ?
+\begin{align}
+\mathcal{I}_{up,loss}(z, z_{test}) & \myeq\frac{dL(z_{test}, \hat\theta_{\epsilon, z})}{d\epsilon}\vert_{\epsilon=0}  \nonumber\\ 
+\onslide<2->{& = \nabla_{\theta}L(z_{test}, \hat{\theta})^T\frac{d\hat\theta_{\epsilon, z}}{d\epsilon}\vert_{\epsilon=0}  \nonumber \quad \textnormal{\small(apply the chain rule)} \\}
+\onslide<3->{& = -\nabla_\theta{}L(z_{test}, \hat\theta)^TH_{\hat\theta}^{-1}\nabla_{\theta}L(z, \hat\theta)\nonumber}
+\end{align}
+\onslide<4->{
+Influence on $z_{test}$ by upweigting $z$:
+\begin{equation}
+\mathcal{I}_{up,loss}(z, z_{test}) = -\nabla_\theta{}L(z_{test}, \hat\theta)^TH_{\hat\theta}^{-1}\nabla_{\theta}L(z, \hat\theta)
+\end{equation}
+}
+}
+\frame{
+\frametitle{Perturbing a training instance}
+A train instance $z = (x, y)$, define a new instance $z_\delta \myeq (x + \delta, y)$. 
+\begin{center}
+If $z \mapsto z_\delta$, what is the change on $\theta$?
+\end{center}
+
+By definition,
+\begin{equation}\nonumber
+\hat\theta_{\epsilon, z_{\delta}, -z} \myeq \argmin_{\theta\in\Theta} \frac{1}{n}\sum_{i=1}^{n}L(z_i, \theta)+\epsilon L(z_\delta, \theta) - \epsilon L(z, \theta)
+\end{equation}
+And we obtains
+\begin{align}
+\frac{d\hat\theta_{\epsilon, z_\delta, -z}}{d\epsilon}\vert_{\epsilon = 0} &= \mathcal{I}_{up, params}(z_\delta) - \mathcal{I}_{up, params}(z) \nonumber\\
+&= -H_{\hat\theta}^{-1}(\nabla_{\theta}L(z_\delta, \hat\theta) - \nabla_{\theta}L(z, \hat\theta))
+\end{align}
+\begin{equation}
+\Delta = \hat\theta_{z_\delta, -z} - \hat\theta \approx \frac{1}{n}(\mathcal{I}_{up,params}(z_\delta) - \mathcal{I}_{up, params}(z))
+\end{equation}
+}
+\frame{
+\frametitle{Perturbing influence on the test loss}
+\begin{equation}
+\nabla_{\theta}L(z_\delta, \hat\theta) - \nabla_{\theta}L(z, \hat\theta) \approx [\nabla_x\nabla_{\theta}L(z, \hat\theta)]\delta
+\end{equation}
+Hence, 
+\begin{equation}
+\frac{d\hat\theta_{\epsilon, z_\delta, -z}}{d\epsilon}\vert_{\epsilon = 0} \approx -H_{\hat\theta}^{-1}[\nabla_x\nabla_{\theta}L(z, \hat\theta)]\delta
+\end{equation}
+
+\begin{align}
+\mathcal{I}_{pert, loss}(z, z_{test})T &\myeq \nabla_{\delta}L(z_{test}, \hat\theta_{z_\delta, -z})^T\vert_{\delta=0} \\
+&= -\nabla_{\theta}L(z_{test}, \hat\theta)^TH_{\hat\theta}^{-1}\nabla_x\nabla_{\theta}L(z, \hat\theta)
+\end{align}
+}
+
+\end{document}
