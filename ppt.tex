@@ -25,6 +25,7 @@
 \frame{\tableofcontents}
 
 \section{Introduction}
+\frame{\tableofcontents[currentsection, sectionstyle=show/shaded]}
 \begin{frame}
 \frametitle{The problem}
 \begin{itemize}
@@ -40,10 +41,11 @@ If we remove $z$ from the training data, the change on parameter is $\Delta = \h
 % \hat{\theta} &\myeq \argmin_{\theta\in\Theta}\frac{1}{n}\sum_{i=1}^nL(z_i, \theta) \nonumber\\
 \hat{\theta}_{-z} &\myeq \argmin_{\theta\in\Theta}\sum_{z_i\neq z}L(z_i, \theta) \nonumber
 \end{align}
-Retraining the model in leave-one-out scheme is prohibitively slow.
+Retraining the model in leave-one-out regime is prohibitively slow.
 \end{frame}
 
 \section{Approach}
+\frame{\tableofcontents[currentsection, sectionstyle=show/shaded]}
 \begin{frame}
 \frametitle{Influence on the parameters $\theta$}
 Let $\hat{\theta}_{\epsilon, z}$ the parameters if $z$ were up-weighted by some small $\epsilon$:
@@ -124,7 +126,9 @@ $\mathcal{I}_{pert, loss}(z, z_{test})$描述的是对训练样本$z$本身做�
 \end{equation}
 \end{frame}
 \section{Efficiently Calculating Influence（略过）}
+\frame{\tableofcontents[currentsection, sectionstyle=show/shaded]}
 \section{Validation experiments}
+\frame{\tableofcontents[currentsection, sectionstyle=show/shaded]}
 \begin{frame}
 \frametitle{Influence functions vs. leave-one-out retraining}
 \begin{center}
@@ -153,11 +157,12 @@ $\mathcal{I}_{pert, loss}(z, z_{test})$描述的是对训练样本$z$本身做�
   - 1w & 61.36 & 46.47 \\ \hline
 \end{tabular}
 \end{center}
-测试集合效果提升很快，说明influence的计算结果是有意义的；\\
-OOT上的效果略升后下降，说明通过这种方式剔除样本会使训练集合向测试集合样本分布拟合，从而降低了模型泛化能力。
+Test集合效果提升很快，说明influence的计算结果是有意义的；\\
+OOT上的效果略升后下降，说明通过这种方式剔除样本会使训练集合（模型）向测试集合样本分布拟合，从而降低了模型泛化能力。
 \end{frame}
 
 \section{Use cases}
+\frame{\tableofcontents[currentsection, sectionstyle=show/shaded]}
 \begin{frame}
 \frametitle{Understanding model behavior（模型行为的可解释性）}
 选取一个测试图片（图左上角），分别计算SVM和NN模型训练样本的influences，并挑选最重要的两个样本。
@@ -176,7 +181,7 @@ OOT上的效果略升后下降，说明通过这种方式剔除样本会使训�
 \end{tabular} 
 \end{column}%
 \end{columns}
-同时，作者也给出了反例，（如图右上角），狗由于身上的纹路与测试样本相似，因此也对预测有帮助（wtf?)
+同时，作者也给出了反例，（如图右上角），狗由于身上的纹路与测试样本相似，因此也对预测有帮助（呵呵）
 \end{frame}
 \begin{frame}
 \frametitle{Training attacks（机器学习模型的安全性）}
@@ -224,5 +229,10 @@ iv & 0.0012 & 0.0084 & 0.0004 & 0.0031 & 0.0011 & 0.0213 \\ \hline
 \end{tabular} 
 \end{column}%
 \end{columns}
+\end{frame}
+\begin{frame}
+\begin{center}
+谢谢！
+\end{center}
 \end{frame}
 \end{document}
